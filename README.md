@@ -55,7 +55,7 @@ $db->query('UPDATE `product` SET `name` = :s, `price` = :d WHERE `product_id` = 
 С помощью :name можно подставить название таблицы или столбца. :names подставляет несколько названий через запятую:
 
 ```php
-$db->query('INSERT INTO :name (:names) VALUES (:s, :i, :s) ', ['product', ['name', 'price'], 'Товар1', 1000]);
+$db->query('INSERT INTO :name (:names) VALUES (:s, :i) ', ['product', ['name', 'price'], 'Товар1', 1000]);
 ```
 
 ### :set
