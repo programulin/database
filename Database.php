@@ -2,6 +2,7 @@
 /**
  * Класс для работы с базой данных.
  */
+class Database
 {
 	private $host;
 	private $login;
@@ -62,7 +63,7 @@
 	 * @param array $params
 	 * @return mixed
 	 */
-	public function selectOne(string $query, array $params = [])
+	public function selectOne($query, array $params = [])
 	{
 		return $this->query($query, $params)->fetchColumn();
 	}
@@ -171,8 +172,8 @@
 						$type = PDO::PARAM_BOOL;
 					else
 						$type = PDO::PARAM_STR;
-					
-					$stmt->bindParam($k + 1, $v, $type);
+
+					$stmt->bindValue($k + 1, $v, $type);
 				}
 			}
 
