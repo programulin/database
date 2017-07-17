@@ -140,17 +140,16 @@ $count = $db->selectOne('SELECT COUNT(*) FROM `product`');
 Получение массива, в котором первая колонка - ключи, вторая - значения:
 
 ```php
-$db->selectKeyPair('SELECT `name`, `price` FROM `product`');
+$db->selectKeyPair('SELECT `product_id`, `name` FROM `product`');
 ```
 
 На выходе будет нечто вроде:
 ```html
 Array
 (
-    [Товар 1] => 1500
-    [Товар 2] => 1600
-    [Товар 3] => 1700
-    [Телефон] => 1500
+    [1] => Товар 1
+    [2] => Товар 2
+    [3] => Товар 3
 )
 ```
 
@@ -159,7 +158,7 @@ Array
 Получение записей, сгруппированных по первому столбцу:
 
 ```php
-$db->selectGroup('SELECT `status`, `name` FROM `product`');
+$db->selectGroup('SELECT `status`, `name`, `price` FROM `product`');
 ```
 
 На выходе будет нечто вроде:
