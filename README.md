@@ -6,7 +6,7 @@
 
 Требования:
 -----------------------------------
-- PHP версии 5.4+
+- PHP 5.4+
 - PDO
 - MySQL
 
@@ -69,7 +69,7 @@ $product = [
 	'status' => false
 ];
   
-$db->query('INSERT `product` SET :set', [$product]);
+$db->query('INSERT INTO `product` SET :set', [$product]);
 
 $db->query('UPDATE `product` SET :set WHERE `product_id` = :i', [$product, 5]);
 ```
