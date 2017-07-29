@@ -9,7 +9,8 @@
  * @todo Плейсхолдер :search, позволяющий осуществлять поиск с
  * условиями =, !=, >, <, between, like, возможно in.
  */
-class Database {
+class Database
+{
 
     private $host;
     private $login;
@@ -29,15 +30,17 @@ class Database {
      * @param string $login
      * @param string $password
      * @param string $database
-     * @param int $timeout Максимальное время ожидания следующего запроса (wait_timeout).
+     * @param int $timeout
+     * @param string $charset
      */
-    public function __construct($host, $login, $password, $database, $charset = 'UTF8', $timeout = null) {
+    public function __construct($host, $login, $password, $database, $timeout = 0, $charset = 'UTF8')
+    {
         $this->host = $host;
         $this->login = $login;
         $this->password = $password;
         $this->database = $database;
-        $this->charset = $charset;
         $this->timeout = $timeout;
+        $this->charset = $charset;
     }
 
     /**
@@ -47,7 +50,8 @@ class Database {
      * @param array $params
      * @return array
      */
-    public function select($query, array $params = []) {
+    public function select($query, array $params = [])
+    {
         return $this->query($query, $params)->fetchAll();
     }
 
@@ -58,7 +62,8 @@ class Database {
      * @param array $params
      * @return array
      */
-    public function selectRow($query, array $params = []) {
+    public function selectRow($query, array $params = [])
+    {
         return $this->query($query, $params)->fetch();
     }
 
@@ -69,7 +74,8 @@ class Database {
      * @param array $params
      * @return mixed
      */
-    public function selectOne($query, array $params = []) {
+    public function selectOne($query, array $params = [])
+    {
         return $this->query($query, $params)->fetchColumn();
     }
 
@@ -81,7 +87,8 @@ class Database {
      * @param array $params
      * @return array
      */
-    public function selectKeyPair($query, array $params = []) {
+    public function selectKeyPair($query, array $params = [])
+    {
         return $this->query($query, $params)->fetchAll(PDO::FETCH_KEY_PAIR);
     }
 
@@ -92,7 +99,8 @@ class Database {
      * @param array $params Значения для плейсхолдеров.
      * @return array Результат выборки.
      */
-    public function selectGroup($query, array $params = []) {
+    public function selectGroup($query, array $params = [])
+    {
         return $this->query($query, $params)->fetchAll(PDO::FETCH_GROUP);
     }
 
@@ -103,7 +111,8 @@ class Database {
      * @param array $params Значения для плейсхолдеров.
      * @return array Результат выборки.
      */
-    public function selectColumn($query, array $params = []) {
+    public function selectColumn($query, array $params = [])
+    {
         return $this->query($query, $params)->fetchAll(PDO::FETCH_COLUMN);
     }
 
@@ -114,7 +123,8 @@ class Database {
      * @param array $params
      * @return int
      */
-    public function update($query, array $params = []) {
+    public function update($query, array $params = [])
+    {
         return (int) $this->query($query, $params)->rowCount();
     }
 
@@ -125,7 +135,8 @@ class Database {
      * @param array $params
      * @return int
      */
-    public function insert($query, array $params = []) {
+    public function insert($query, array $params = [])
+    {
         $this->query($query, $params);
         return $this->lastInsertId();
     }
@@ -137,7 +148,8 @@ class Database {
      * @param array $params
      * @return int
      */
-    public function delete($query, array $params = []) {
+    public function delete($query, array $params = [])
+    {
         return (int) $this->query($query, $params)->rowCount();
     }
 
@@ -148,16 +160,20 @@ class Database {
      * @param array $params Значения для плейсхолдеров.
      * @return object Объект PDOStatement
      */
-    public function query($query, array $params = []) {
+    public function query($query, array $params = [])
+    {
         if (!$this->pdo)
             $this->connect();
 
-        if (!empty($params)) {
+        if (!empty($params))
+        {
             $this->parseQuery($query, $params);
             $stmt = $this->pdo->prepare($this->output_query);
 
-            if (!empty($this->output_params)) {
-                foreach ($this->output_params as $k => $v) {
+            if (!empty($this->output_params))
+            {
+                foreach ($this->output_params as $k => $v)
+                {
                     if (is_numeric($v))
                         $type = PDO::PARAM_INT;
                     elseif (is_null($v))
@@ -182,7 +198,8 @@ class Database {
      * 
      * @return object
      */
-    public function pdo() {
+    public function pdo()
+    {
         return $this->pdo;
     }
 
@@ -190,7 +207,8 @@ class Database {
      * Подключение к базе данных.
      * @return type
      */
-    public function connect() {
+    public function connect()
+    {
         $dsn = "mysql:host={$this->host};dbname={$this->database};charset={$this->charset}";
 
         $options = [
@@ -199,6 +217,7 @@ class Database {
             PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
         ];
 
+        $this->close();
         $this->pdo = new PDO($dsn, $this->login, $this->password, $options);
 
         if ($this->timeout)
@@ -208,15 +227,18 @@ class Database {
     /**
      * Закрытие соединения с БД.
      */
-    public function close() {
+    public function close()
+    {
         $this->pdo = null;
     }
 
-    public function lastInsertId() {
+    public function lastInsertId()
+    {
         return (int) $this->pdo->lastInsertId();
     }
 
-    private function parseQuery($query, array $params) {
+    private function parseQuery($query, array $params)
+    {
         $this->input_params = $params;
         $this->output_params = [];
 
@@ -226,7 +248,8 @@ class Database {
             throw new Exception('Значений больше, чем плейсхолдеров.');
     }
 
-    private function placeholderHandler(array $ph) {
+    private function placeholderHandler(array $ph)
+    {
         $param = array_shift($this->input_params);
         $ph = $ph[0];
 
@@ -234,7 +257,8 @@ class Database {
             throw new Exception("Для плейсхолдера '{$ph}' не найдено значение.");
 
         # :v :s :b :i, :d
-        if (in_array($ph, [':v', ':s', ':b', ':i', ':d'], true)) {
+        if (in_array($ph, [':v', ':s', ':b', ':i', ':d'], true))
+        {
             if (!$this->validateValue($param))
                 throw new Exception('Некорректное значение плейсхолдера :v.');
 
@@ -252,7 +276,8 @@ class Database {
         }
 
         # :name
-        elseif ($ph === ':name') {
+        elseif ($ph === ':name')
+        {
             if (!$this->validateName($param))
                 throw new Exception('Некорректное значение плейсхолдера :name.');
 
@@ -260,11 +285,13 @@ class Database {
         }
 
         # :names
-        elseif ($ph === ':names') {
+        elseif ($ph === ':names')
+        {
             if (!is_array($param) or empty($param))
                 throw new Exception('Значение плейсхолдера :names должно быть непустым массивом.');
 
-            foreach ($param as $name) {
+            foreach ($param as $name)
+            {
                 if (!$this->validateName($name))
                     throw new Exception('Некорректное значение плейсхолдера :names.');
 
@@ -275,11 +302,13 @@ class Database {
         }
 
         # :set
-        elseif ($ph === ':set') {
+        elseif ($ph === ':set')
+        {
             if (!is_array($param) or empty($param))
                 throw new Exception('Значение плейсхолдера :set должно быть непустым массивом.');
 
-            foreach ($param as $name => $value) {
+            foreach ($param as $name => $value)
+            {
                 if (!$this->validateName($name))
                     throw new Exception('Некорректный ключ одного из параметров :set.');
 
@@ -294,14 +323,16 @@ class Database {
         }
 
         # :where
-        elseif ($ph === ':where') {
+        elseif ($ph === ':where')
+        {
             if (empty($param))
                 return;
 
             if (!is_array($param))
                 throw new Exception('Значение плейсхолдера :where должно быть массивом.');
 
-            foreach ($param as $name => $value) {
+            foreach ($param as $name => $value)
+            {
                 if (!$this->validateName($name))
                     throw new Exception('Некорректный ключ одного из параметров :where.');
 
@@ -316,14 +347,16 @@ class Database {
         }
 
         # :in
-        elseif ($ph === ':in') {
+        elseif ($ph === ':in')
+        {
             if (empty($param))
                 return 'IN (false)';
 
             if (!is_array($param) or empty($param))
                 throw new Exception('Значение плейсхолдера :in должно быть непустым массивом.');
 
-            foreach ($param as $value) {
+            foreach ($param as $value)
+            {
                 if (!$this->validateValue($value))
                     throw new Exception('Некорректное значение одного из параметров :in.');
 
@@ -334,7 +367,8 @@ class Database {
         }
 
         # :limit
-        elseif ($ph === ':limit') {
+        elseif ($ph === ':limit')
+        {
             if (!is_array($param))
                 $param = [$param];
 
@@ -348,7 +382,8 @@ class Database {
             if (!in_array(true, $param, false))
                 return '';
 
-            foreach ($param as $value) {
+            foreach ($param as $value)
+            {
                 if (!$this->validateValue($value))
                     throw new Exception('Один из параметров :limit некорректный.');
 
@@ -363,11 +398,13 @@ class Database {
             throw new Exception("Некорректный плейсхолдер '{$ph}'.");
     }
 
-    private function validateValue($value) {
+    private function validateValue($value)
+    {
         return in_array(gettype($value), ['boolean', 'integer', 'double', 'string', 'NULL'], true);
     }
 
-    private function validateName($value) {
+    private function validateName($value)
+    {
         if (!in_array(gettype($value), ['string', 'double', 'integer'], true))
             return false;
 
@@ -377,7 +414,8 @@ class Database {
         return true;
     }
 
-    private function protectName($name) {
+    private function protectName($name)
+    {
         $parts = explode('.', $name);
 
         foreach ($parts as $k => $part)
