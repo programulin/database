@@ -1,4 +1,5 @@
 <?php
+namespace Programulin\Database;
 
 /**
  * Класс для работы с базой данных.
@@ -9,7 +10,7 @@
  * @todo Плейсхолдер :search, позволяющий осуществлять поиск с
  * условиями =, !=, >, <, between, like, возможно in.
  */
-class Database
+class Connection
 {
 
     private $host;
