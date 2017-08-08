@@ -115,10 +115,9 @@ $db->query('UPDATE `product` :set WHERE `product_id` = :i', [$product, 5]);
 
 ```php
 $where = [
-	['status', '>=', 1]
+	['status', '>=', 1],
+	['price', 'between', [500, 1000]]
 ];
-
-$where[] = ['price', 'between', [500, 1000]];
 
 if(!empty($_POST['keyword']))	
 	$where[] = ['name', 'like', "%{$_POST['keyword']}%"];
