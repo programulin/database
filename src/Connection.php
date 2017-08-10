@@ -169,21 +169,18 @@ class Connection
             $this->parser->parse($query, $params);
             $stmt = $this->pdo->prepare($this->parser->query());
 
-            if (!empty($this->parser->params()))
+            foreach ($this->parser->params() as $k => $v)
             {
-                foreach ($this->parser->params() as $k => $v)
-                {
-                    if (is_numeric($v))
-                        $type = PDO::PARAM_INT;
-                    elseif (is_null($v))
-                        $type = PDO::PARAM_NULL;
-                    elseif (is_bool($v))
-                        $type = PDO::PARAM_BOOL;
-                    else
-                        $type = PDO::PARAM_STR;
+                if (is_numeric($v))
+                    $type = PDO::PARAM_INT;
+                elseif (is_null($v))
+                    $type = PDO::PARAM_NULL;
+                elseif (is_bool($v))
+                    $type = PDO::PARAM_BOOL;
+                else
+                    $type = PDO::PARAM_STR;
 
-                    $stmt->bindValue($k + 1, $v, $type);
-                }
+                $stmt->bindValue($k + 1, $v, $type);
             }
 
             $stmt->execute();
