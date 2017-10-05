@@ -523,7 +523,7 @@ class Product extends Record
 
     protected function beforeDelete()
     {
-        if($this->params['status'] == 1)
+        if($this->has('price') and $this->price == 1)
             throw new \Exception('Нельзя удалять включённые товары.');
     }
 }
