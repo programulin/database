@@ -1,8 +1,24 @@
-Класс для работы с БД
+Библиотека для работы с MySQL.
 =====================
-Простой класс для работы с базой данных.
 
-Включает в себя плейсхолдеры и несколько функций для быстрого получения данных в нужном виде.
+Библиотека включает в себя 3 компонента:
+
+1. Плейсхолдеры:
+
+```php
+$db->select('SELECT * FROM :name WHERE :name > :i', ['products', 'price', 5000]);
+
+$params = [
+    'name' => 'Товар',
+    'price' => 1000
+];
+
+$db->insert('UPDATE `products` :set WHERE `id` = :i', [$params, 10]);
+```
+
+2. Функции для быстрого получения данных в нужном виде: selectRow, selectOne, selectColumn, selectKeyPair и т.п.
+
+3. Простенькая реализация ActiveRecord.
 
 Требования:
 -----------------------------------
@@ -13,44 +29,76 @@
 Начало работы
 -----------------------------------
 
-1. Устанавливаем c помощью Composer, либо подключаем файл \src\Connection.php через include/require.
-
-2. Создаём объект Connection и передаём в него реквизиты доступа. При необходимости можно указать максимальное время ожидания и кодировку (по-умолчанию UTF8).
-
-```php
-$db = new \Programulin\Database\Connection('localhost', 'root', '', 'database', 60, 'UTF8');
+1. Устанавливаем c помощью Composer:
+```json
+{
+    "require":{
+        "programulin/database": "dev-master"
+    },
+    "repositories":[
+        {
+            "type":"github",
+            "url":"https://github.com/programulin/database"
+        }
+    ]
+}
 ```
 
-Скрипт подключается к базе при выполнении 1-го запроса. Т.е. создание объекта Database не приводит к подключению к базе.
-
-Максимальное время ожидания
------------------------------------
-
-Время ожидания указывает, сколько секунд должна ждать MySQL перед автоматическим закрытием соединения.
-
-Допустим, вы указали время ожидания 30 секунд. Если в течение следующих 30 секунд вы не отправите ниодного запросе к базе, соединение будет автоматически закрыто. Попытка выполнить любой SQL-запрос после закрытия соединения приведёт к ошибке 'MySQL server has gone away.'.
-
-Если ваши скрипты рассчитаны на выполнение в течение длительного времени, указывайте большое время ожидания, либо запустите переподключение вручную.
-
-Пример:
+2. Указываем реквизиты доступа к одной или нескольким БД:
 
 ```php
-// Создаём экземпляр Database. Соединение с базой пока НЕ произошло.
-$db = new Database('localhost', 'root', '', 'database', 60, 'UTF8');
+use Programulin\Database\Manager;
 
-// Пошёл 1-ый SQL-запрос. В этот момент происходит подключение к базе. Через 60 секунд соединение закроется.
-$db->select('SELECT * FROM `table`');
+// Для одного соединения:
+Manager::config([
+	'name'     => 'db1',
+	'default'  => true,
+	'login'    => 'root',
+	'password' => '',
+	'database' => 'db1',
+	'host'     => 'localhost',
+	'charset'  => 'UTF8', // Необязательно, по-умолчанию UTF8
+	'timeout'  => 600 // Необязательно, изменяет параметр wait_timeout
+]);
 
-// Прошло 50 секунд, запускаем ещё один запрос. Теперь у вас опять есть 60 секунд до закрытия соединения.
-sleep(50);
-$db->select('SELECT * FROM `table`');
+// Для нескольких соединений:
+$config[] = [
+	'name'     => 'db1',
+	'default'  => true,
+	'login'    => 'root',
+	'password' => '',
+	'database' => 'db1',
+	'host'     => 'localhost',
+	'timeout'  => 600
+];
 
-// Прошло больше 60 секунд и соединение закрылось. Чтобы не получить ошибку, переподключаемся
-// с помощью connect() и опять можем работать.
-sleep(65);
-$db->connect(); // Переподключение
-$db->select('SELECT * FROM `table`');
+$config[] = [
+	'name'     => 'db2',
+	'login'    => 'root',
+	'password' => '',
+	'database' => 'db2',
+	'host'     => 'localhost'
+];
+
+Manager::configs($config);
 ```
+
+3. При необходимости передаём фабричный метод генерации новых объектов:
+
+```php
+Manager::factory(function($class){
+	return new $class();
+});
+```
+
+4. Получаем объект соединения с БД:
+
+```php
+// Если не указать название, будет выбрано соединение по-умолчанию.
+$db = Manager::conn('db1');
+```
+
+Подключение к БД происходит при выполнении 1-го запроса. Т.е. вызов conn() не приводит к подключению к базе.
 
 Плейсхолдеры
 -----------------------------------
@@ -148,7 +196,7 @@ $values = ['Товар1, Товар2, Товар3'];
 $db->query('SELECT * FROM `product` WHERE `name` :in', [$values]);
 ```
 
-Если в качестве значения передать пустоту (в том числе пустой массив), в SQL запросе это отобразится как IN(false) и условие не будет обработано. Другими словами, следующие запросы приведут к одинаковому результату:
+Если в качестве значения передать пустоту (в том числе пустой массив), в SQL запросе это отобразится как IN(false) и условие не будет обработано. Следующие запросы приведут к одинаковому результату:
 
 ```php
 $values = [];
@@ -335,6 +383,150 @@ $db->connect();
 
 ```php
 $db->close();
+```
+
+ActiveRecord
+-----------------------------------
+Класс модели должен наследоваться от Programulin\Database\Record. По-умолчанию настройки класса принимают следующий вид:
+
+1. Название таблицы берётся из последнего элемента пространства имён в нижнем регистре(для класса App\Models\Product_Image таблица будет product_image),
+2. Первичный ключ - id,
+3. Подключение к БД - то, что было указано в конфиге по-умолчанию.
+
+Все эти настройки можно менять:
+
+```php
+use Programulin\Database\Record;
+
+class Product extends Record
+{
+    public static function conn()
+    {
+        return 'db2';
+    }
+
+    public static function table()
+    {
+        return 'product';
+    }
+
+    public static function key()
+    {
+        return 'product_id';
+    }
+}
+```
+
+### Поиск записей.
+```php
+// Получение одной записи по id.
+$product = Product::findById(10);
+
+// Получение по SQL-запросу. Начало вида 'SELECT * FROM `table`' писать не нужно.
+$product = Product::findOne('WHERE `price` > :i LIMIT 1', [1000]);
+
+// Получение всех записей.
+$products = Product::find();
+
+// Получение записей по характеристикам.
+$where = [
+	['price', 'between', [500, 1000]],
+	['status', '=', 1]
+];
+
+$products = Product::find(':where LIMIT 10', [$where]);
+
+// Получение записей по SQL-запросу.
+$products = Product::find('SELECT * FROM `product` LIMIT 50');
+
+// Получение количества записей.
+$count_all = Product::count();
+$count_active = Product::count('WHERE `status` = 1');
+```
+
+### Создание, изменение и удаление записей.
+```php
+// Создание записи
+$product = Product::create();
+
+// Изменение параметров
+$product->name = 'Название';
+$product->price = 1000;
+
+// Сохранение
+$product->save();
+
+// Получение актуальной информации из БД по идентификатору:
+$product->id = 10;
+$product->refresh();
+
+// Удаление
+$product->delete();
+
+// Удаление множества записей:
+Product::findAndDelete('WHERE `price` < :i', [1000]);
+```
+
+### Управление параметрами.
+```php
+$product = Product::findById(15);
+
+$params = [
+	'name' => 'Новое название'
+	'price' => 1000,
+	'status' => 1
+];
+
+// Импорт всех параметров
+$product->import($params)
+
+// Импорт только указанных параметров
+$product->import($params, ['name', 'price']);
+
+// Импорт всех параметров, кроме указанных
+$product->import($params, ['status'], true);
+
+// Экспорт всех параметров
+$options = $product->export();
+
+// Экспорт только указанных параметров
+$options = $product->export(['name', 'price']);
+
+// Экспорт всех параметров, кроме указанных
+$options = $product->export(['status'], true);
+
+// Проверка существования параметра
+if(!$product->has('price'))
+    $product->price = 50;
+```
+
+### События сохранения и удаления записи.
+Вы можете переопределить методы beforeSave(), beforeDelete() и afterSave() для добавления валидации и прочего функционала:
+
+```php
+use Programulin\Database\Record;
+
+class Product extends Record
+{
+    private $saves;
+
+    protected function beforeSave()
+    {
+        if(!$this->has('price'))
+            throw new \Exception('Отсутствует цена!');
+	}
+
+    protected function afterSave()
+    {
+        $this->saves++;
+    }
+
+    protected function beforeDelete()
+    {
+        if($this->params['status'] == 1)
+            throw new \Exception('Нельзя удалять включённые товары.');
+    }
+}
 ```
 
 ChangeLog:

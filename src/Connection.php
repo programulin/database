@@ -3,15 +3,8 @@ namespace Programulin\Database;
 
 use PDO;
 
-/**
- * Класс для работы с базой данных.
- * 
- * @version 1.2.0
- * @link https://github.com/web-dynamics/database
- */
 class Connection
 {
-
     private $host;
     private $login;
     private $password;
@@ -28,10 +21,10 @@ class Connection
      * @param string $login
      * @param string $password
      * @param string $database
-     * @param int $timeout
      * @param string $charset
+     * @param int $timeout
      */
-    public function __construct($host, $login, $password, $database, $timeout = 0, $charset = 'UTF8')
+    public function __construct($host, $login, $password, $database, $charset = 'UTF8', $timeout = 0)
     {
         $this->host = $host;
         $this->login = $login;
@@ -208,8 +201,8 @@ class Connection
         $dsn = "mysql:host={$this->host};dbname={$this->database};charset={$this->charset}";
 
         $options = [
-            PDO::ATTR_EMULATE_PREPARES => true,
-            PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+            PDO::ATTR_EMULATE_PREPARES   => true,
+            PDO::ATTR_ERRMODE            => PDO::ERRMODE_EXCEPTION,
             PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
         ];
 

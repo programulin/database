@@ -1,7 +1,7 @@
 <?php
 namespace Programulin\Database;
 
-use Programulin\Database\Exception\ParserError;
+use Programulin\Database\Exceptions\Parser as ParserException;
 
 class QueryParser
 {
@@ -17,7 +17,7 @@ class QueryParser
         $this->output_query = preg_replace_callback('~(:[a-z]{1,})~s', [$this, 'placeholderHandler'], $query);
         
         if (!empty($this->input_params))
-            throw new ParserError('Значений больше, чем плейсхолдеров.');
+            throw new ParserException('Значений больше, чем плейсхолдеров.');
     }
     
     public function params()
@@ -36,7 +36,7 @@ class QueryParser
         $ph = $ph[0];
 
         if (is_null($param))
-            throw new ParserError("Для плейсхолдера '{$ph}' не найдено значение.");
+            throw new ParserException("Для плейсхолдера '{$ph}' не найдено значение.");
 
         # :v :s :b :i, :d
         if (in_array($ph, [':v', ':s', ':b', ':i', ':d'], true))
@@ -68,13 +68,13 @@ class QueryParser
 
         # wrong name
         else
-            throw new ParserError("Некорректный плейсхолдер '{$ph}'.");
+            throw new ParserException("Некорректный плейсхолдер '{$ph}'.");
     }
     
     private function pType($ph, $param)
     {
         if(!$this->validateValue($param))
-            throw new ParserError('Некорректное значение плейсхолдера :v.');
+            throw new ParserException('Некорректное значение плейсхолдера :v.');
 
         if ($ph === ':s')
             $param = (string) $param;
@@ -92,7 +92,7 @@ class QueryParser
     private function pName($param)
     {
         if (!$this->validateName($param))
-            throw new ParserError('Некорректное значение плейсхолдера :name.');
+            throw new ParserException('Некорректное значение плейсхолдера :name.');
 
         return $this->protectName($param);
     }
@@ -100,12 +100,12 @@ class QueryParser
     private function pNames($param)
     {
         if(!is_array($param) or empty($param))
-            throw new ParserError('Значение плейсхолдера :names должно быть непустым массивом.');
+            throw new ParserException('Значение плейсхолдера :names должно быть непустым массивом.');
 
         foreach ($param as $name)
         {
             if (!$this->validateName($name))
-                throw new ParserError('Некорректное значение плейсхолдера :names.');
+                throw new ParserException('Некорректное значение плейсхолдера :names.');
 
             $names[] = $this->protectName($name);
         }
@@ -116,15 +116,15 @@ class QueryParser
     private function pSet($param)
     {
         if (!is_array($param) or empty($param))
-            throw new ParserError('Значение плейсхолдера :set должно быть непустым массивом.');
+            throw new ParserException('Значение плейсхолдера :set должно быть непустым массивом.');
 
         foreach ($param as $name => $value)
         {
             if (!$this->validateName($name))
-                throw new ParserError('Некорректный ключ одного из параметров :set.');
+                throw new ParserException('Некорректный ключ одного из параметров :set.');
 
             if (!$this->validateValue($value))
-                throw new ParserError('Некорректное значение одного из параметров :set.');
+                throw new ParserException('Некорректное значение одного из параметров :set.');
 
             $this->output_params[] = $value;
             $sets[] = $this->protectName($name) . ' = ?';
@@ -139,17 +139,17 @@ class QueryParser
             return;
         
         if(!is_array($arr))
-            throw new ParserError('В :where нужно передавать массив.');
+            throw new ParserException('В :where нужно передавать массив.');
 
         $where = [];
         
         foreach($arr as $k => $v)
         {
             if(!is_array($v) or count($v) != 3)
-                throw new ParserError("В :where нужно передавать массив, содержащий подмассивы с 3 значениями.");
+                throw new ParserException("В :where нужно передавать массив, содержащий подмассивы с 3 значениями.");
 
             if(!$this->validateName($v[0]))
-                throw new ParserError('Некорректное название столбца в :where.');
+                throw new ParserException('Некорректное название столбца в :where.');
 
             $elem = $k + 1;
             $name = $this->protectName($v[0]);
@@ -159,7 +159,7 @@ class QueryParser
             if(in_array($action, ['>', '>=', '<', '<=', '=', '!=', 'LIKE'], true))
             {
                 if(!$this->validateValue($value))
-                    throw new ParserError("Некорректное значение у массива $elem плейсхолдера :where.");
+                    throw new ParserException("Некорректное значение у массива $elem плейсхолдера :where.");
                 
                 $this->output_params[] = $value;
                 
@@ -169,7 +169,7 @@ class QueryParser
             elseif($action === 'BETWEEN')
             {
                 if(!isset($value[0], $value[1]) or !$this->validateValue($value[0]) or !$this->validateValue($value[1]))
-                   throw new ParserError('Некорректные значения BETWEEN плейсхолдера :where.');
+                   throw new ParserException('Некорректные значения BETWEEN плейсхолдера :where.');
                 
                 $where[] = $name . ' BETWEEN ? AND ?';
                 $this->output_params[] = $value[0];
@@ -180,7 +180,7 @@ class QueryParser
                 $where[] = $name . ' ' . $this->pIn($value);
             
             else
-                throw new ParserError("Некорректное условие в массиве $elem плейсхолдера :where.");
+                throw new ParserException("Некорректное условие в массиве $elem плейсхолдера :where.");
         }
 
         return 'WHERE ' . implode(' AND ', $where);
@@ -192,12 +192,12 @@ class QueryParser
             return 'IN (false)';
 
         if (!is_array($param) or empty($param))
-            throw new ParserError('Значение плейсхолдера :in должно быть непустым массивом.');
+            throw new ParserException('Значение плейсхолдера :in должно быть непустым массивом.');
 
         foreach ($param as $value)
         {
             if (!$this->validateValue($value))
-                throw new ParserError('Некорректное значение одного из параметров :in.');
+                throw new ParserException('Некорректное значение одного из параметров :in.');
 
             $this->output_params[] = $value;
             $in[] = '?';
@@ -211,7 +211,7 @@ class QueryParser
             $param = [$param];
 
         if (count($param) > 2)
-            throw new ParserError('Некорректное значение плейсхолдера :limit.');
+            throw new ParserException('Некорректное значение плейсхолдера :limit.');
 
         /*
          * Поиск любого значения, которое приводится к true.
@@ -223,7 +223,7 @@ class QueryParser
         foreach ($param as $value)
         {
             if (!$this->validateValue($value))
-                throw new ParserError('Один из параметров :limit некорректный.');
+                throw new ParserException('Один из параметров :limit некорректный.');
 
             $limits[] = (int) $value;
         }
