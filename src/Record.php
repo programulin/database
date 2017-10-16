@@ -150,7 +150,7 @@ class Record
 	 * @param array $params
 	 * @return int
 	 */
-	public static function count($sql, array $params = [])
+	public static function count($sql = '', array $params = [])
 	{
 		$query = 'SELECT COUNT(*) FROM :name ' . $sql;
 		array_unshift($params, static::table());
