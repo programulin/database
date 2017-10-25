@@ -471,6 +471,9 @@ Product::findAndDelete('WHERE `price` < :i', [1000]);
 ```php
 $product = Product::findById(15);
 
+// Получение идентификатора записи
+$id = $product->id();
+
 $params = [
 	'name' => 'Новое название'
 	'price' => 1000,
@@ -478,13 +481,17 @@ $params = [
 ];
 
 // Импорт всех параметров
-$product->import($params)
+$product->import($params);
 
 // Импорт только указанных параметров
 $product->import($params, ['name', 'price']);
 
 // Импорт всех параметров, кроме указанных
 $product->import($params, ['status'], true);
+
+// Создание записи и импорт параметров
+$product = Product::create(['name' => 'Название']);
+$product = Product::create(['name' => 'Название'], ['name'], true);
 
 // Экспорт всех параметров
 $options = $product->export();
@@ -531,6 +538,9 @@ class Product extends Record
 
 ChangeLog:
 -----------------------------------
+### 2.1
+- Добавлен статический метод findByIdOrCreate(), которая возвращает либо найденную запись, либо пустой объект.
+- Добавлен метод id(), позволяющий получить идентификатор записи.
 ### 2.0
 - Добавлена возможность управления записями с помощью паттерна ActiveRecord.
 
