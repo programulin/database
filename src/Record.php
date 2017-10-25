@@ -124,6 +124,23 @@ class Record
 	}
 
 	/**
+	 * Возвращает найденную запись, либо пустой объект.
+	 * 
+	 * @param int $id
+	 * @return object
+	 */
+	public static function findByIdOrCreate($id)
+	{
+		$sql = 'SELECT * FROM :name WHERE :name = :i';
+		$params = static::db()->selectRow($sql, [static::table(), static::key(), $id]);
+
+		if(!$params)
+			$params = [];
+
+		return static::create($params);
+	}
+
+	/**
 	 * Поиск записей по полному SQL-запросу.
 	 * 
 	 * @param string $sql
@@ -182,6 +199,17 @@ class Record
 		$this->params[$name] = $value;
 	}
 
+	/**
+	 * Получение идентификатора записи.
+	 * 
+	 * @return int|null
+	 */
+	public function id()
+	{
+		$column = static::key();
+		return $this->$column;
+	}
+	
 	/**
 	 * Провека существования параметра записи.
 	 * 
