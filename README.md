@@ -437,7 +437,7 @@ $where = [
 $products = Product::find(':where LIMIT 10', [$where]);
 
 // Получение записей по SQL-запросу.
-$products = Product::find('SELECT * FROM `product` LIMIT 50');
+$products = Product::findBySql('SELECT * FROM `product` LIMIT 50');
 
 // Получение количества записей.
 $count_all = Product::count();
