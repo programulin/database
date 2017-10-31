@@ -191,7 +191,7 @@ $res2 = $db->query('SELECT * FROM `product` :where', [$search]);
 С помощью :in можно подставить массив значений в оператор IN:
 
 ```php
-$values = ['Товар1, Товар2, Товар3'];
+$values = ['Товар1', 'Товар2', 'Товар3'];
 
 $db->query('SELECT * FROM `product` WHERE `name` :in', [$values]);
 ```
