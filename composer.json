@@ -7,6 +7,6 @@
         "psr-4": {
             "Programulin\\Database\\": "src/"
         }
-    }
+    },
 	"minimum-stability": "dev"
 }
