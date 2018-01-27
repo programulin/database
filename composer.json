@@ -1,12 +1,12 @@
 {
-    "name":"programulin/database",
-    "require":{
-        "php":">=5.4.0"
-    },
-    "autoload": {
-        "psr-4": {
-            "Programulin\\Database\\": "src/"
-        }
-    },
+	"name":"programulin/database",
+	"require":{
+		"php":">=5.4.0"
+	},
+	"autoload": {
+		"psr-4": {
+			"Programulin\\Database\\": "src/"
+		}
+	},
 	"minimum-stability": "dev"
 }

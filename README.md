@@ -3,7 +3,7 @@
 
 Библиотека включает в себя 3 компонента:
 
-1. Плейсхолдеры:
+1) Плейсхолдеры:
 
 ```php
 $db->select('SELECT * FROM :name WHERE :name > :i', ['products', 'price', 5000]);
@@ -16,9 +16,9 @@ $params = [
 $db->insert('UPDATE `products` :set WHERE `id` = :i', [$params, 10]);
 ```
 
-2. Функции для быстрого получения данных в нужном виде: selectRow, selectOne, selectColumn, selectKeyPair и т.п.
+2) Функции для быстрого получения данных в нужном виде: selectRow, selectOne, selectColumn, selectKeyPair и т.п.
 
-3. Простенькая реализация ActiveRecord.
+3) Простенькая реализация ActiveRecord.
 
 Требования:
 -----------------------------------
@@ -29,22 +29,13 @@ $db->insert('UPDATE `products` :set WHERE `id` = :i', [$params, 10]);
 Начало работы
 -----------------------------------
 
-1. Устанавливаем c помощью Composer:
-```json
-{
-    "require":{
-        "programulin/database": "dev-master"
-    },
-    "repositories":[
-        {
-            "type":"github",
-            "url":"https://github.com/programulin/database"
-        }
-    ]
-}
+1) Устанавливаем c помощью Composer:
+
+```
+composer require programulin/database
 ```
 
-2. Указываем реквизиты доступа к одной или нескольким БД:
+2) Указываем реквизиты доступа к одной или нескольким БД:
 
 ```php
 use Programulin\Database\Manager;
@@ -83,7 +74,7 @@ $config[] = [
 Manager::configs($config);
 ```
 
-3. При необходимости передаём фабричный метод генерации новых объектов:
+3) При необходимости передаём фабричный метод генерации новых объектов:
 
 ```php
 Manager::factory(function($class){
@@ -91,7 +82,7 @@ Manager::factory(function($class){
 });
 ```
 
-4. Получаем объект соединения с БД:
+4) Получаем объект соединения с БД:
 
 ```php
 // Если не указать название, будет выбрано соединение по-умолчанию.
