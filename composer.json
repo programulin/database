@@ -8,4 +8,5 @@
             "Programulin\\Database\\": "src/"
         }
     }
+	"minimum-stability": "dev"
 }
