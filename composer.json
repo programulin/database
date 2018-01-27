@@ -1,6 +1,5 @@
 {
     "name":"programulin/database",
-    "version":"2.1.0",
     "require":{
         "php":">=5.4.0"
     },
