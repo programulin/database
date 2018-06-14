@@ -13,7 +13,7 @@ $params = [
     'price' => 1000
 ];
 
-$db->insert('UPDATE `products` :set WHERE `id` = :i', [$params, 10]);
+$db->update('UPDATE `products` :set WHERE `id` = :i', [$params, 10]);
 ```
 
 2) Функции для быстрого получения данных в нужном виде: selectRow, selectOne, selectColumn, selectKeyPair и т.п.
