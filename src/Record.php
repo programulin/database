@@ -221,6 +221,22 @@ class Record
 		return array_key_exists($name, $this->params);
 	}
 
+	public function __isset($name)
+	{
+		return $this->has($name);
+	}
+
+	/**
+	 * Провека параметра на пустоту.
+	 * 
+	 * @param string $name
+	 * @return bool
+	 */
+	public function empty($name)
+	{
+		return empty($this->params[$name]);
+	}
+	
 	/**
 	 * Импорт параметров.
 	 * 

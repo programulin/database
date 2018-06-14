@@ -178,7 +178,8 @@ class Connection
 
             $stmt->execute();
             return $stmt;
-        } else
+        }
+		else
             return $this->pdo->query($query);
     }
 

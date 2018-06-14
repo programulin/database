@@ -496,6 +496,10 @@ $options = $product->export(['status'], true);
 // Проверка существования параметра
 if(!$product->has('price'))
     $product->price = 50;
+	
+// Проверка параметра на пустоту
+if($product->empty('price'))
+    $product->price = 50;	
 ```
 
 ### События сохранения и удаления записи.
