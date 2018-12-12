@@ -118,7 +118,7 @@ class Record
 	public static function findById($id)
 	{
 		$sql = 'SELECT * FROM :name WHERE :name = :i';
-		$params = static::db()->selectRow($sql, [static::table(), static::key(), $id]);
+		$params = static::db()->selectRow($sql, [static::table(), static::key(), (int) $id]);
 
 		return !empty($params) ? static::create($params) : null;
 	}
@@ -132,7 +132,7 @@ class Record
 	public static function findByIdOrCreate($id)
 	{
 		$sql = 'SELECT * FROM :name WHERE :name = :i';
-		$params = static::db()->selectRow($sql, [static::table(), static::key(), $id]);
+		$params = static::db()->selectRow($sql, [static::table(), static::key(), (int) $id]);
 
 		if(!$params)
 			$params = [];
@@ -366,7 +366,7 @@ class Record
 		$this->afterSave();
 	}
 
-	protected function update()
+	public function update()
 	{
 		$query = 'UPDATE :name :set WHERE :name = :i';
 
@@ -376,7 +376,7 @@ class Record
 		static::db()->update($query, [static::table(), $params, static::key(), $this->params[static::key()]]);
 	}
 
-	protected function insert()
+	public function insert()
 	{
 		$params = $this->params;
 
